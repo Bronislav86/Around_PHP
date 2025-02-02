@@ -18,27 +18,30 @@ class TelegramApiImpl implements TelegramAPI {
         $result = [];
 
         while (true) {
-            $ch = curl_init("{$url}&offset={$offset}");
+            $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
+    
             $response = json_decode(curl_exec($ch), true);
-
-            if (!$response['ok'] || empty($response['result'])) break; 
+            curl_close($ch);
+    
+            if (!$response['ok'] || empty($response['result'])) {
+                break;
+            }
+    
             foreach ($response['result'] as $data) {
-                // die(var_dump($data));
-/*
-reminder-bot@reminderbot-VirtualBox:~$ php /home/reminder-bot/cur/runner -c tg_messages
-PHP Warning:  Undefined array key "$text" in /home/reminder-bot/cur/app/Telegram/TelegramApiImpl.php on line 30
-{"offset":866315780,"result":{"1999701408":[null]}}reminder-bot@reminderbot-VirtualBox:~$ 
-*/
-
-                $result[$data['message']['chat']['id']] = [...$result[$data['message']['chat']['id']] ?? [], $data['message']['$text']];
+                if (isset($data['message']['text'])) {
+                    if (!isset($result[$data['message']['chat']['id']])) {
+                        $result[$data['message']['chat']['id']] = [];
+                    }
+                    $result[$data['message']['chat']['id']][] = $data['message']['text'];
+                }
                 $offset = $data['update_id'] + 1;
             }
-            curl_close($ch);
-
-            if(count($response['result']) < 100) break;
+    
+            if (count($response['result']) < 100) {
+                break;
+            }
         }
 
         return [
