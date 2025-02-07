@@ -11,23 +11,22 @@ class TelegramApiImpl implements TelegramAPI {
         $this->token = $token;
     }
 
-    public function getMessages(int $offset): array{
+    public function getMessages(int $offset = 0): array{
         
         $url = self::ENDPOINT . $this->token . '/getUpdates?timeout=1';
 
         $result = [];
 
         while (true) {
-            $ch = curl_init($url);
+            $ch = curl_init("{$url}&offset={$offset}");
+
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     
             $response = json_decode(curl_exec($ch), true);
-            curl_close($ch);
+            
     
-            if (!$response['ok'] || empty($response['result'])) {
-                break;
-            }
+            if (!$response['ok'] || empty($response['result'])) break;
     
             foreach ($response['result'] as $data) {
                 if (isset($data['message']['text'])) {
@@ -38,10 +37,9 @@ class TelegramApiImpl implements TelegramAPI {
                 }
                 $offset = $data['update_id'] + 1;
             }
+            curl_close($ch);
     
-            if (count($response['result']) < 100) {
-                break;
-            }
+            if (count($response['result']) < 100) break;
         }
 
         return [
