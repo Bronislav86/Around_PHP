@@ -17,6 +17,6 @@ class EventSender
     {
         $this->telegram->sendMessage($receiver, $message);
 
-        echo date('d.m.y H:i') . " Я отправил сообщение $message получателю с id $receiver\n";
+        echo date('d.m.y H:i') . " Я отправил сообщение $message получателю c id $receiver\n";
     }
 }
