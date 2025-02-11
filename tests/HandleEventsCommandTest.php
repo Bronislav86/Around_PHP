@@ -1,8 +1,12 @@
 <?php
 
-//php ./vendor/bin/phpunit ./tests/ --filter SaveEventCommand    1:15:29
+//php ./vendor/bin/phpunit ./tests/ --filter SaveEventCommand
 
 use PHPUnit\Framework\TestCase;
+
+/**
+ * @covers HandleEventsCommand
+ */
 
 class HandleEventsCommandTest extends TestCase
 {
