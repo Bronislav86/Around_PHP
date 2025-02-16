@@ -2,6 +2,8 @@
 
 namespace App\Telegram;
 
+use App\Telegram\TelegramAPI;
+
 class TelegramApiImpl implements TelegramAPI {
     const ENDPOINT = 'https://api.telegram.org/bot';
     private int $offset;

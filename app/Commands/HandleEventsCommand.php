@@ -3,16 +3,12 @@
 namespace App\Commands;
 
 use App\Application;
-
 use App\Database\SQLite;
-
 use App\EventSender\EventSender;
-
 use App\Models\Event;
-
 use App\Models\EventDto;
-
 use App\Telegram\TelegramApiImpl;
+use App\Queue\RabbitMQ;
 
 class HandleEventsCommand extends Command
 
@@ -36,7 +32,9 @@ class HandleEventsCommand extends Command
 
         $events = $event->select();
 
-        $eventSender = new EventSender(new TelegramApiImpl($this->app->env('TELEGRAM_TOKEN')));
+        $queue = new RabbitMQ('eventSender');
+
+        $eventSender = new EventSender(new TelegramApiImpl($this->app->env('TELEGRAM_TOKEN')), $queue);
 
         foreach ($events as $event) {
 

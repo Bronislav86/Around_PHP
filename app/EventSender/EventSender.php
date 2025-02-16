@@ -1,22 +1,36 @@
 <?php
 namespace App\EventSender;
 
+use App\Queue\Queue;
+use App\Queue\Queueable;
 use App\Telegram\TelegramAPI;
 
-class EventSender
+class EventSender implements Queueable
 {
-    private TelegramAPI $telegram;
+    private string $receiver;
+    private string $message;
 
-    public function __construct(TelegramAPI $telegram)
-    {
-
-        $this->telegram = $telegram;
+    public function __construct(
+        private TelegramAPI $telegram,
+        private Queue $queue
+    ){
     }
 
     public function sendMessage(string $receiver, string $message)
     {
-        $this->telegram->sendMessage($receiver, $message);
+        $this->toQueue($receiver, $message);
+    }
 
-        echo date('d.m.y H:i') . " Я отправил сообщение $message получателю c id $receiver\n";
+    public function handle():void
+    {
+        $this->telegram->sendMessage($this->receiver, $this->message);
+    }
+
+    public function toQueue(...$args):void
+    {
+        $this->receiver = $args[0];
+        $this->message = $args[1];
+
+        $this->queue->sendMessage(serialize($this));
     }
 }
